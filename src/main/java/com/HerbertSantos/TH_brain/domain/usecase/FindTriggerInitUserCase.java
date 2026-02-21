@@ -2,32 +2,34 @@ package com.HerbertSantos.TH_brain.domain.usecase;
 
 import com.HerbertSantos.TH_brain.domain.model.TriggerResponse;
 import com.HerbertSantos.TH_brain.domain.model.User;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
+@Service
 public class FindTriggerInitUserCase {
-    private User user = new User();
 
-    public FindTriggerInitUserCase(User user) {
-        this.user = user;
+    private final GetTimeBasedGreetingUseCase getTimeBasedGreetingUseCase;
+
+    public FindTriggerInitUserCase(GetTimeBasedGreetingUseCase getTimeBasedGreetingUseCase) {
+        this.getTimeBasedGreetingUseCase = getTimeBasedGreetingUseCase;
     }
 
-    private TriggerResponse execute(String text){
-        if (text.equalsIgnoreCase("ola th") || text.equalsIgnoreCase("th")){
-           return new TriggerResponse(
+    public TriggerResponse execute(User user){
+        String text = user.getEffectiveText();
+        if (text == null) return new TriggerResponse(false, null, null);
+        for (String line : text.split("\n")) {
+            String trimmed = line.trim();
+            if (trimmed.equalsIgnoreCase("ola th") || trimmed.equalsIgnoreCase("th")) {
+                return new TriggerResponse(
                    true,
-                   "Olá! Sou o TH, Uma assistência inteligente.",
+                   "Olá!" + getTimeBasedGreetingUseCase.execute(user.getTimeStamp()) + " Sou o TH, Uma assistência inteligente.",
                    LocalDateTime.now()
-           );
+                );
+            }
         }
-        return new TriggerResponse(false,null,null);
+        return new TriggerResponse(false, null, null);
     }
 
-    public User getUser() {
-        return user;
-    }
 
-    public void setUser(User user) {
-        this.user = user;
-    }
 }
