@@ -1,14 +1,18 @@
 package com.HerbertSantos.TH_brain.domain.usecase;
 
-import com.HerbertSantos.TH_brain.domain.model.User;
+import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
+@Service
 public class GetTimeBasedGreetingUseCase {
 
     public String execute(Long timeStamp) {
+        if (timeStamp == null) {
+            timeStamp = System.currentTimeMillis();
+        }
         // 1. Converte os milissegundos para um ponto na linha do tempo
         Instant instant = Instant.ofEpochMilli(timeStamp);
 
@@ -22,9 +26,9 @@ public class GetTimeBasedGreetingUseCase {
         if (hora >= 5 && hora < 12) {
             return "Bom dia";
         } else if (hora >= 12 && hora < 18) {
-            return "Boa tarde";
+            return "a Boa tarde";
         } else {
-            return "Boa noite";
+            return "a Boa noite";
         }
     }
 }
