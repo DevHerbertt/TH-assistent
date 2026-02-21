@@ -1,4 +1,4 @@
-# TH-brain
+# TH-assistent-brain
 
 **Backend do cérebro da TH (Tecnologia Humana)** — assistente pessoal com IA local via [Ollama](https://ollama.com), pensada para integração com WhatsApp e outros canais através de um orquestrador (ex.: [th-bridge](https://github.com) em Node.js).
 
