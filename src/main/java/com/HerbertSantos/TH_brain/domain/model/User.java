@@ -1,8 +1,18 @@
 package com.HerbertSantos.TH_brain.domain.model;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
+
+@Data
+@NoArgsConstructor
 public class User {
+    private boolean conversationActivate;
     private String from;
     private String text;
+    /** Várias mensagens enviadas em sequência (bridge faz debounce e manda de uma vez). Se preenchido, o fluxo usa isso em vez de text. */
+    private List<String> messages;
     private Long timeStamp;
     private String name;
     private String menssageId;
@@ -10,7 +20,16 @@ public class User {
     private MessageType messageType;
     private String deviceType;
 
-    public User(String from, String text, Long timeStamp, String name, String menssageId, boolean isgroup, MessageType messageType, String deviceType) {
+    /** Texto efetivo para o processamento: se tiver messages, junta todas; senão usa text. */
+    public String getEffectiveText() {
+        if (messages != null && !messages.isEmpty()) {
+            return String.join("\n", messages);
+        }
+        return text != null ? text : "";
+    }
+
+    public User(boolean conversationActivate, String from, String text, Long timeStamp, String name, String menssageId, boolean isgroup, MessageType messageType, String deviceType) {
+        this.conversationActivate = conversationActivate;
         this.from = from;
         this.text = text;
         this.timeStamp = timeStamp;
@@ -21,67 +40,4 @@ public class User {
         this.deviceType = deviceType;
     }
 
-    public String getFrom() {
-        return from;
-    }
-
-    public void setFrom(String from) {
-        this.from = from;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
-    }
-
-    public Long getTimeStamp() {
-        return timeStamp;
-    }
-
-    public void setTimeStamp(Long timeStamp) {
-        this.timeStamp = timeStamp;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getMenssageId() {
-        return menssageId;
-    }
-
-    public void setMenssageId(String menssageId) {
-        this.menssageId = menssageId;
-    }
-
-    public boolean isIsgroup() {
-        return isgroup;
-    }
-
-    public void setIsgroup(boolean isgroup) {
-        this.isgroup = isgroup;
-    }
-
-    public MessageType getMessageType() {
-        return messageType;
-    }
-
-    public void setMessageType(MessageType messageType) {
-        this.messageType = messageType;
-    }
-
-    public String getDeviceType() {
-        return deviceType;
-    }
-
-    public void setDeviceType(String deviceType) {
-        this.deviceType = deviceType;
-    }
 }
