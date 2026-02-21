@@ -1,2 +1,10 @@
-package com.HerbertSantos.TH_brain.infrastructure.gateway.dto;public record OllamaResponse() {
+package com.HerbertSantos.TH_brain.infrastructure.gateway.dto;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+public record OllamaResponse(
+        String response,
+        String model
+) {
 }
