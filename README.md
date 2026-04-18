@@ -1,4 +1,4 @@
-# TH-brain
+# TH-assistent-brain
 
 **Backend do cérebro da TH (Tecnologia Humana)** — assistente pessoal com IA local via [Ollama](https://ollama.com), pensada para integração com WhatsApp e outros canais através de um orquestrador (ex.: [th-bridge](https://github.com) em Node.js).
 
@@ -51,7 +51,7 @@ O front de conversa (WhatsApp, Telegram, etc.) fica em um serviço separado (o *
 ## Stack tecnológica
 
 - **Java 21**
-- **Spring Boot 4.0.2** (Web MVC, Validation, Actuator, RestClient)
+- **Spring Boot 4.0.5** (Web MVC, Validation, Actuator, RestClient)
 - **Ollama** (modelo local, ex.: `llama3.2`)
 - **Lombok**
 - **Maven**
