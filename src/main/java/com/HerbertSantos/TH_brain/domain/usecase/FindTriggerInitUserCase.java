@@ -23,7 +23,7 @@ public class FindTriggerInitUserCase {
             if (trimmed.equalsIgnoreCase("ola th") || trimmed.equalsIgnoreCase("th")) {
                 return new TriggerResponse(
                    true,
-                   "Olá!" + getTimeBasedGreetingUseCase.execute(user.getTimeStamp()) + " Sou o TH, Uma assistência inteligente.",
+                   "Olá! " + getTimeBasedGreetingUseCase.execute(user.getTimeStamp()) + " Sou o TH, Uma assistência inteligente.",
                    LocalDateTime.now()
                 );
             }

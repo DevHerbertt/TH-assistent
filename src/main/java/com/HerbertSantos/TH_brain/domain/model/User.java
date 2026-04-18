@@ -11,7 +11,6 @@ public class User {
     private boolean conversationActivate;
     private String from;
     private String text;
-    /** Várias mensagens enviadas em sequência (bridge faz debounce e manda de uma vez). Se preenchido, o fluxo usa isso em vez de text. */
     private List<String> messages;
     private Long timeStamp;
     private String name;
@@ -19,6 +18,10 @@ public class User {
     private boolean isgroup;
     private MessageType messageType;
     private String deviceType;
+
+    public User(String name) {
+        this.name = name;
+    }
 
     /** Texto efetivo para o processamento: se tiver messages, junta todas; senão usa text. */
     public String getEffectiveText() {

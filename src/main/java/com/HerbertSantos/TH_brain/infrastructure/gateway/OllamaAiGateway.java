@@ -7,6 +7,9 @@ import com.HerbertSantos.TH_brain.domain.model.User;
 import com.HerbertSantos.TH_brain.infrastructure.config.AiPromptConfig;
 import com.HerbertSantos.TH_brain.infrastructure.gateway.dto.OllamaRequest;
 import com.HerbertSantos.TH_brain.infrastructure.gateway.dto.OllamaResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -20,26 +23,37 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class OllamaAiGateway implements AiGateway {
 
-    private static final int MAX_CONTEXT_LENGTH = 1_500;
+    private static final Logger log = LoggerFactory.getLogger(OllamaAiGateway.class);
+    private static final int MAX_CONTEXT_LENGTH = 2_000;
 
     private final RestTemplate restTemplate;
+    private final String ollamaModel;
+    private final String baseUrl;
     private OllamaRequest dataRequest;
 
-    /** Última troca por usuário (from): "Usuário: ...\nTH: ..." — temporário até BD. */
+
     private static final ConcurrentHashMap<String, String> lastTurnByUser = new ConcurrentHashMap<>();
 
-    public OllamaAiGateway(RestTemplate restTemplate) {
+    public OllamaAiGateway(RestTemplate restTemplate,
+                           @Value("${ollama.model:llama3.2}") String ollamaModel,
+                           @Value("${ollama.base-url:http://localhost:11434}") String baseUrl) {
         this.restTemplate = restTemplate;
+        this.ollamaModel = ollamaModel;
+        this.baseUrl = baseUrl;
     }
 
     @Override
     public AiResponse conversation(User user) {
+        String userKey = user.getFrom() != null ? user.getFrom() : "unknown";
+
         if (!user.isConversationActivate()) {
+            log.debug("[Ollama] Conversa inativa para user={}, ignorando chamada", userKey);
             return null;
         }
-        String url = "http://localhost:11434/api/generate";
-        String userKey = user.getFrom() != null ? user.getFrom() : "unknown";
+
+        String url = baseUrl + "/api/generate";
         String userContent = user.getEffectiveText();
+        log.info("[Ollama] Iniciando conversa | user={} | model={} | url={}", userKey, ollamaModel, url);
 
         String previousContext = lastTurnByUser.get(userKey);
         StringBuilder prompt = new StringBuilder();
@@ -49,22 +63,36 @@ public class OllamaAiGateway implements AiGateway {
                     ? previousContext.substring(previousContext.length() - MAX_CONTEXT_LENGTH)
                     : previousContext;
             prompt.append("\n\nConversa anterior (para não perder o fio da meada):\n").append(trimmed);
+            log.debug("[Ollama] Contexto anterior presente para user={}, tamanho={} (max={})",
+                    userKey, trimmed.length(), MAX_CONTEXT_LENGTH);
         }
         prompt.append("\n\nMensagens atuais do usuário (responda uma única vez considerando tudo):\n").append(userContent);
 
-        dataRequest = new OllamaRequest("llama3.2", prompt.toString(), false);
+        int promptLength = prompt.length();
+        log.debug("[Ollama] Prompt montado | user={} | tamanho={} caracteres", userKey, promptLength);
+
+        dataRequest = new OllamaRequest(ollamaModel, prompt.toString(), false);
 
         try {
+            log.debug("[Ollama] Chamando API | user={} | model={}", userKey, ollamaModel);
             OllamaResponse response = restTemplate.postForObject(url, dataRequest, OllamaResponse.class);
+
             if (response == null) {
+                log.warn("[Ollama] Resposta nula da API | user={} | url={}", userKey, url);
                 return null;
             }
+
             String thResponse = response.response();
             String newTurn = "Usuário: " + userContent + "\nTH: " + thResponse;
             lastTurnByUser.put(userKey, newTurn);
 
+            log.info("[Ollama] Resposta recebida | user={} | model={} | resposta length={}",
+                    userKey, response.model(), thResponse != null ? thResponse.length() : 0);
             return new AiResponse(thResponse, response.model(), true);
+
         } catch (Exception e) {
+            log.error("[Ollama] Erro ao chamar API | user={} | model={} | url={} | erro={}",
+                    userKey, ollamaModel, url, e.getMessage(), e);
             throw new BrainAiException("Erro ao se conectar com ollama \n version : " + dataRequest.model()
                     + " Horario " + LocalDateTime.now(),
                     e.getMessage());
@@ -75,6 +103,7 @@ public class OllamaAiGateway implements AiGateway {
     public static void clearContextForUser(String userKey) {
         if (userKey != null) {
             lastTurnByUser.remove(userKey);
+            log.debug("[Ollama] Contexto limpo para user={}", userKey);
         }
     }
 }

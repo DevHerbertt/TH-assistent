@@ -174,8 +174,16 @@ Resposta esperada (200): JSON com `response`, `model`, `dateTime`, `isSucess`.
 |-------------|-----------|--------|
 | `spring.application.name` | Nome da aplicação | `TH-brain` |
 | `spring.docker.compose.enabled` | Habilita subida automática de Docker Compose | `false` |
+| `ollama.model` | Nome do modelo no Ollama | `llama3.2` |
+| `ollama.base-url` | URL base da API do Ollama | `http://localhost:11434` |
 
-A URL do Ollama está fixa em `http://localhost:11434` no `OllamaAiGateway`. Para tornar configurável, use `@Value("${ollama.url}")` e defina em `application.properties` ou variáveis de ambiente.
+**TH mais esperta:** o system prompt já orienta a TH a usar contexto e raciocinar. Para respostas ainda melhores, use um modelo mais capaz no Ollama e configure em `application.properties`:
+
+- `ollama.model=llama3.1:8b` — melhor raciocínio que o 3.2 3B
+- `ollama.model=qwen2.5:7b` — muito bom em português e tarefas
+- `ollama.model=mistral` ou `mixtral` — modelos fortes (exigem mais RAM)
+
+Baixe o modelo com `ollama pull <nome>` antes de alterar a propriedade.
 
 ---
 

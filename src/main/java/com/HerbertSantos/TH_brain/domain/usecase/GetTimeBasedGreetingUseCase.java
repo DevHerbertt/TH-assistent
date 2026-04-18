@@ -24,11 +24,11 @@ public class GetTimeBasedGreetingUseCase {
 
         // 4. Lógica de saudação
         if (hora >= 5 && hora < 12) {
-            return "Bom dia";
+            return "um Bom dia";
         } else if (hora >= 12 && hora < 18) {
-            return "a Boa tarde";
+            return " Boa tarde";
         } else {
-            return "a Boa noite";
+            return " Boa noite";
         }
     }
 }
